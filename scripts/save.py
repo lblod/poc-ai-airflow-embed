@@ -16,15 +16,13 @@ def save(endpoint):
             q = f"""
             PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
             
-            DELETE {{
-                GRAPH <http://mu.semte.ch/application> {{
-                    <{file_reference}> ext:searchEmbedding ?oldEmbedding.
-                }}
+             DELETE{{
+             GRAPH <http://mu.semte.ch/application>{{
+             <{file_reference}> ext:searchEmbedding ?embed; ext:ingestedByMl2GrowSmartRegulationsEmbedding ?sre . 
             }}
-            WHERE {{
-                GRAPH <http://mu.semte.ch/application> {{
-                    OPTIONAL {{<{file_reference}> ext:searchEmbedding ?oldEmbedding.}}
-                }}
+            }}
+            WHERE{{
+             <{file_reference}> ext:searchEmbedding ?embed; ext:ingestedByMl2GrowSmartRegulationsEmbedding ?sre .            
             }}
             """
 
