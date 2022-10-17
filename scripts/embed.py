@@ -9,11 +9,13 @@ def embed(*args):
         model = TransformersClassifierHandler()
         records = read_json(file_name="export.json")
 
+        # If no records are available skip
+        if not records:
+            return None
+
         if not model.initialized:
             model.initialize()
 
-        if records is None:
-            return None
         text = [t["text"][:10_000] for t in records]
 
         # Call model inference on text

@@ -13,6 +13,10 @@ def save(endpoint):
     :return:
     """
     records = read_json(file_name="embedded.json")
+
+    if not records:
+        return None
+
     headers = {
         "Accept": "application/sparql-results+json,*/*;q=0.9"
     }
