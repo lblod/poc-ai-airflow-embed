@@ -1,6 +1,7 @@
-import requests
-from gcs import write_json
 import fire
+import requests
+
+from gcs import write_json
 
 
 def load(endpoint, query):
@@ -21,7 +22,7 @@ def load(endpoint, query):
 
     # processing data from the response to the pandas data frame and saving it
     data = r.json()["results"]["bindings"]
-    records = [{k: v['value'] for k,v in i.items()} for i in data]
+    records = [{k: v['value'] for k, v in i.items()} for i in data]
     write_json(file_name="export.json", content=records)
 
 

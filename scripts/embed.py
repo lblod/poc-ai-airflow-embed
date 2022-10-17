@@ -1,5 +1,6 @@
-from gcs import read_json, write_json
 import fire
+
+from gcs import read_json, write_json
 from pretrained import TransformersClassifierHandler
 
 

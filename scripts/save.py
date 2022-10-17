@@ -1,7 +1,8 @@
-from gcs import read_json
-import requests
 import fire
+import requests
 from tqdm import tqdm
+
+from gcs import read_json
 
 
 def save(endpoint):
@@ -36,7 +37,7 @@ def save(endpoint):
             # request for the sparql DELETE WHERE statement above
             r = requests.post(endpoint, data={"query": q}, headers=headers)
             if r.status_code != 200:
-                print(f"[FAILURE] {50*'-'} /n {q} /n {50*'-'}")
+                print(f"[FAILURE] {50 * '-'} /n {q} /n {50 * '-'}")
 
             q = f"""
             PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
@@ -53,7 +54,7 @@ def save(endpoint):
             r = requests.post(endpoint, data={"query": q}, headers=headers)
 
             if r.status_code != 200:
-                print(f"[FAILURE] {50*'-'} /n {q} /n {50*'-'}")
+                print(f"[FAILURE] {50 * '-'} /n {q} /n {50 * '-'}")
 
         # basic exception handeling, easy to read in airflow logs
         except Exception as ex:
