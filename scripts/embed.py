@@ -14,7 +14,11 @@ def embed(*args):
         if records is None:
             return None
         text = [t["text"][:10_000] for t in records]
+
+        # Call model inference on text
         embeddings = model.inference(text)
+
+        # Re-order the embeddings in order to write to embedded.json for next step
         embeddings = [{**records[i], "embedding": embedding["embedding"]} for i, embedding in
                       enumerate(embeddings["texts"])]
         write_json(file_name="embedded.json", content=embeddings)
