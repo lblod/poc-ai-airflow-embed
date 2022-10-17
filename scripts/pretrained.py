@@ -8,6 +8,18 @@ from transformers import RobertaModel, RobertaTokenizer
 # from ts.metrics.dimension import Dimension
 logger = logging.getLogger(__name__)
 
+seed = 1
+import random
+import numpy as np
+
+random.seed(seed)
+np.random.seed(seed)
+
+torch.manual_seed(seed)
+torch.cuda.manual_seed_all(seed)
+
+logger = logging.getLogger(__name__)
+
 
 # Returns grouped_entities=True
 class TransformersClassifierHandler(ABC):
@@ -30,6 +42,9 @@ class TransformersClassifierHandler(ABC):
         # Read model serialize/pt file
         self.model = RobertaModel.from_pretrained(model_path).to(self.device)
         self.tokenizer = RobertaTokenizer.from_pretrained(model_path)
+
+        # Turn off dropout
+        self.model.eval()
 
         logger.debug(
             "Transformer model {0} loaded successfully".format(model_path)
@@ -78,16 +93,25 @@ class TransformersClassifierHandler(ABC):
         # for input in inputs:
         texts = [" ".join(text.split()) for text in inputs]
 
-        # I am aware that this is not actually fully batched, but that's not really relevant here.
+        # I am aware that this is not actually fully batched, but that's not really relevant in this context.
         processed_embeddings = []
         for text in tqdm(texts, miniters=500):
-            if len(text) == 0:
+            if len(text) != 0:
+                with torch.no_grad():
+                    # Get reprocessed input_ids and attention_masks
+                    result = reprocess_encodings(
+                        self.tokenizer.encode_plus(text, None, add_special_tokens=False)["input_ids"])
+
+                    # Inference of the received input_ids/attention_mask
+                    embedding = self.model(**result)["pooler_output"]
+
+                    # Mean of resulting embeddings or simple squeeze to prep for next step
+                    new_embedding = embedding.squeeze(0) if embedding.shape[0] == 1 else torch.mean(embedding, 0)
+
+                    # Append embeddings (list) embeddings -
+                    processed_embeddings.append(new_embedding.squeeze(0).tolist())
+            else:
                 processed_embeddings.append([])
                 continue
-            result = reprocess_encodings(self.tokenizer.encode_plus(text, None, add_special_tokens=False)["input_ids"])
-            # pooled_embeddings.append(self.model(**result)["pooler_output"])
-            embedding = self.model(**result)["pooler_output"]
-            new_embedding = embedding.squeeze(0) if embedding.shape[0] == 1 else torch.mean(embedding, 0)
-            processed_embeddings.append(new_embedding.squeeze(0).tolist())
 
         return {"texts": [{"embedding": item} for item in processed_embeddings]}
